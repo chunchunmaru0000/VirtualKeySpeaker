@@ -1,22 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Speech.Synthesis;
 using System.Globalization;
-using System.Threading;
 using Gma.System.MouseKeyHook;
 using System.Windows.Forms;
+using NAudio.Wave;
+using System.IO;
+using System.Speech.AudioFormat;
 
 namespace VirtualKeySpeaker
 {
@@ -27,8 +19,12 @@ namespace VirtualKeySpeaker
 	{
 		#region VAR
 		SpeechSynthesizer synthesizer { get; set; }
+		MemoryStream soundStream { get; set; }
 		IKeyboardEvents hook { get; set; }
 		bool isSpeaking { get; set; }
+		int deviceIndex { get; set; }
+		WaveOutEvent waveOutEvent { get; set; }
+		BufferedWaveProvider waveProvider { get; set; }
 		#endregion
 		#region VAR_SETTINGS
 		List<Keys> speakKeys { get; set; }
@@ -38,15 +34,39 @@ namespace VirtualKeySpeaker
 		VoiceAge voiceAge { get; set; }
 		TimeSpan fadeTime = TimeSpan.FromSeconds(15);
 		#endregion
+		#region CONST
+		const string deviceName = "CABLE Input";
+		#endregion
 
 		public MainWindow()
 		{
 			InitializeComponent();
 			InitSettings();
 			InitHookAndSpeech();
+			InitMicro();
 		}
 
+
 		#region INITS
+		private void InitMicro()
+		{
+			for (int i = 0; i < WaveOut.DeviceCount; i++)
+			{
+				WaveOutCapabilities data = WaveOut.GetCapabilities(i);
+				if (data.ProductName.Contains(deviceName))
+				{
+					deviceIndex = i;
+					Console.WriteLine(data.ProductName);
+					break;
+				}
+			}
+
+			waveOutEvent = new WaveOutEvent() { DeviceNumber = deviceIndex };
+			waveProvider = new BufferedWaveProvider(new WaveFormat(16000, 1));
+			waveOutEvent.Init(waveProvider);
+			waveOutEvent.Play();
+		}
+
 		private void InitSettings()
 		{
 			speakKeys = new List<Keys> { Keys.RControlKey };
@@ -69,6 +89,12 @@ namespace VirtualKeySpeaker
 				voiceAge, 
 				0,
 				new CultureInfo(culture)
+			);
+
+			soundStream = new MemoryStream();
+			synthesizer.SetOutputToAudioStream(
+				soundStream, 
+				new SpeechAudioFormatInfo(16000, AudioBitsPerSample.Sixteen, AudioChannel.Mono)
 			);
 
 			/*
@@ -106,8 +132,16 @@ namespace VirtualKeySpeaker
 		{
 			if (!isSpeaking)
 			{
-				synthesizer.Speak(string.Join("", InputKey.KeysStream.Select(k => k.Key)));
+				string text = string.Join("", InputKey.KeysStream.Select(k => k.Key));
 				InputKey.Clear();
+
+				synthesizer.Speak(text);
+				Console.WriteLine(text);
+
+				soundStream.Seek(0, SeekOrigin.Begin);
+				byte[] buffer = soundStream.ToArray();
+
+				waveProvider.AddSamples(buffer, 0, buffer.Length);
 			}
 		}
 		#endregion
