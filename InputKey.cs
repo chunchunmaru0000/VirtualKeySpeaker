@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
+using System.Windows.Controls;
 
 namespace VirtualKeySpeaker
 {
@@ -25,17 +26,6 @@ namespace VirtualKeySpeaker
 		{
 			if (KeysStream.Count > 0)
 				KeysStream.RemoveAt(0);
-			//if (InputLabel.Text != "")
-			{
-				//ClientForm cf = InputLabel.FindForm() as ClientForm;
-				//cf.Invoke(new Action(() =>
-				//{
-					//InputLabel.Text = InputLabel.Text.Substring(1, InputLabel.Text.Length - 1);
-					//cf.keysStream.RemoveAt(0);
-
-					//cf.print($"DELETED: {VLCChecker.ktos[Key]}\n\tNOW STREAM: {cf.keysStreamtos()}");
-				//}));
-			}
 			Dispose();
 		}
 
@@ -43,10 +33,8 @@ namespace VirtualKeySpeaker
 		{
 			if (KeysStream.Count > 0)
 			{
-				InputKey last = KeysStream.Last();
-
-				last.Dispose();
-				KeysStream.Remove(last);
+				KeysStream.Last().Dispose();
+				KeysStream.RemoveAt(KeysStream.Count - 1);
 			}
 		}
 

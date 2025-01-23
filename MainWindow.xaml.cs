@@ -9,6 +9,7 @@ using System.Windows.Forms;
 using NAudio.Wave;
 using System.IO;
 using System.Speech.AudioFormat;
+using System.Text;
 
 namespace VirtualKeySpeaker
 {
@@ -27,6 +28,7 @@ namespace VirtualKeySpeaker
 		WaveOutEvent waveOutEvent { get; set; }
 		WaveOutEvent systemSound { get; set; }
 		BufferedWaveProvider waveProvider { get; set; }
+		BufferedWaveProvider systemWaveProvider { get; set; }
 		#endregion
 		#region VAR_SETTINGS
 		List<Keys> speakKeys { get; set; }
@@ -38,7 +40,7 @@ namespace VirtualKeySpeaker
 		#endregion
 		#region CONST
 		const string deviceName = "CABLE Input";
-		const string systemDeviceName = "realme Buds Air 3S";
+		const string systemDeviceName = "3S Stereo";
 		#endregion
 
 		public MainWindow()
@@ -64,11 +66,14 @@ namespace VirtualKeySpeaker
 			}
 
 			waveOutEvent = new WaveOutEvent() { DeviceNumber = deviceIndex };
-			systemSound = new WaveOutEvent() { DeviceNumber = systemDeviceIndex };
 			waveProvider = new BufferedWaveProvider(new WaveFormat(16000, 1));
 			waveOutEvent.Init(waveProvider);
-			systemSound.Init(waveProvider);
 			waveOutEvent.Play();
+
+			systemSound = new WaveOutEvent() { DeviceNumber = systemDeviceIndex };
+			systemWaveProvider = new BufferedWaveProvider(new WaveFormat(16000, 1));
+			systemSound.Init(systemWaveProvider);
+			systemSound.Play();
 		}
 
 		private void InitSettings()
@@ -111,16 +116,20 @@ namespace VirtualKeySpeaker
 		}
 		#endregion
 
-		private void DrawText(string text)
+		private void DrawText()
 		{
-			outLabel.Content += text;
+			string text = string.Join("", InputKey.KeysStream.Select(k => k.Key));
+			outLabel.Content = text;
 		}
 
 		#region HOOK
 		private void HookKeyDownTxt(object sender, KeyDownTxtEventArgs e)
 		{
-			InputKey.KeysStream.Add(new InputKey(e.Chars, fadeTime));
-			DrawText(e.Chars);
+			if (e.Chars.Length > 0 && e.Chars[0] != 8) // backspacve also text
+			{
+				InputKey.KeysStream.Add(new InputKey(e.Chars, fadeTime));
+				DrawText();
+			}
 		}
 
 
@@ -131,7 +140,7 @@ namespace VirtualKeySpeaker
 			else if (clearKeys.Contains(e.KeyCode))
 				Clear();
 			else if (e.KeyCode == Keys.Back)
-				InputKey.DeleteLast();
+				DeleteLast();
 		}
 
 		void Speak()
@@ -148,13 +157,21 @@ namespace VirtualKeySpeaker
 				byte[] buffer = soundStream.ToArray();
 
 				waveProvider.AddSamples(buffer, 0, buffer.Length);
+				systemWaveProvider.AddSamples(buffer, 0, buffer.Length);
 			}
+		}
+
+		void DeleteLast()
+		{
+			InputKey.DeleteLast();
+			DrawText();
 		}
 
 		void Clear()
 		{
 			outLabel.Content = "";
 			InputKey.Clear();
+			DrawText();
 		}
 		#endregion
 	}
