@@ -66,12 +66,12 @@ namespace VirtualKeySpeaker
 			}
 
 			waveOutEvent = new WaveOutEvent() { DeviceNumber = deviceIndex };
-			waveProvider = new BufferedWaveProvider(new WaveFormat(16000, 1));
+			waveProvider = new BufferedWaveProvider(new WaveFormat(16000, 1)) { BufferDuration = TimeSpan.FromMinutes(1) };
 			waveOutEvent.Init(waveProvider);
 			waveOutEvent.Play();
 
 			systemSound = new WaveOutEvent() { DeviceNumber = systemDeviceIndex };
-			systemWaveProvider = new BufferedWaveProvider(new WaveFormat(16000, 1));
+			systemWaveProvider = new BufferedWaveProvider(new WaveFormat(16000, 1)) { BufferDuration = TimeSpan.FromMinutes(1) };
 			systemSound.Init(systemWaveProvider);
 			systemSound.Play();
 		}
@@ -155,6 +155,9 @@ namespace VirtualKeySpeaker
 
 				soundStream.Seek(0, SeekOrigin.Begin);
 				byte[] buffer = soundStream.ToArray();
+
+				if (waveProvider.BufferLength - waveProvider.BufferedBytes < buffer.Length)
+					return;
 
 				waveProvider.AddSamples(buffer, 0, buffer.Length);
 				systemWaveProvider.AddSamples(buffer, 0, buffer.Length);
