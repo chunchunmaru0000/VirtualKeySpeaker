@@ -39,6 +39,17 @@ namespace VirtualKeySpeaker
 			Dispose();
 		}
 
+		public static void DeleteLast()
+		{
+			if (KeysStream.Count > 0)
+			{
+				InputKey last = KeysStream.Last();
+
+				last.Dispose();
+				KeysStream.Remove(last);
+			}
+		}
+
 		public static void Clear()
 		{
 			foreach (InputKey key in KeysStream)
