@@ -1,5 +1,6 @@
 ﻿using NAudio.Wave;
 using System;
+using System.Globalization;
 using System.Windows;
 
 namespace VirtualKeySpeaker
@@ -15,6 +16,16 @@ namespace VirtualKeySpeaker
 		{
 			InitializeComponent();
 			this.mainWindow = mainWindow;
+
+			InitSomeBoxes();
+		}
+
+		private void InitSomeBoxes()
+		{
+			foreach (CultureInfo cultureInfo in CultureInfo.GetCultures(CultureTypes.AllCultures))
+				langBox.Items.Add($"{cultureInfo.Name}|{cultureInfo.DisplayName}");
+
+			langBox.Text = mainWindow.settings.Language;
 		}
 
 		private void Window_Closed(object sender, EventArgs e)
@@ -65,6 +76,15 @@ namespace VirtualKeySpeaker
 				return;
 
 			mainWindow.SetSpeaker(speakersBox.SelectedItem.ToString());
+			Focus();
+		}
+
+		private void langBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+		{
+			if (langBox.SelectedItem == null)
+				return;
+
+			mainWindow.SetSpeech(langBox.SelectedItem.ToString().Split('|')[0]);
 			Focus();
 		}
 	}

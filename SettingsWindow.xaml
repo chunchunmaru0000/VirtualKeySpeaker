@@ -15,38 +15,53 @@
     <Grid>
         <Label 
             Content="Micro" 
-            HorizontalAlignment="Left" Height="26" 
+            HorizontalAlignment="Left" Height="30" 
             Margin="0,0,0,0" VerticalAlignment="Top" Width="163"
             FontSize="16"
             Foreground="Linen"
             />
-
         <ComboBox 
             DropDownOpened="microsBox_DropDownOpened"
             SelectionChanged="microsBox_SelectionChanged"
             x:Name="microsBox"
-            HorizontalAlignment="Left" Height="26" 
-            Margin="0,26,0,0" 
+            HorizontalAlignment="Left" Height="30" 
+            Margin="0,30,0,0" 
             VerticalAlignment="Top" Width="290"
             FontSize="16" Background="#FF585858" BorderBrush="#FF252525"
             />
 
         <Label 
             Content="System speaker" 
-            HorizontalAlignment="Left" Height="26" 
-            Margin="0,52,0,0" VerticalAlignment="Top" Width="163"
+            HorizontalAlignment="Left" Height="30" 
+            Margin="0,60,0,0" VerticalAlignment="Top" Width="163"
             FontSize="16"
             Foreground="Linen"
             />
-
         <ComboBox 
             DropDownOpened="speakersBox_DropDownOpened"
             SelectionChanged="speakersBox_SelectionChanged"
             x:Name="speakersBox"
-            HorizontalAlignment="Left" Height="26" 
-            Margin="0,78,0,0" 
+            HorizontalAlignment="Left" Height="30" 
+            Margin="0,90,0,0" 
             VerticalAlignment="Top" Width="290"
             FontSize="16" Background="#FF585858" BorderBrush="#FF252525"
-            />      
+            />
+
+        <Label 
+            Content="Language speaks" 
+            HorizontalAlignment="Left" Height="30" 
+            Margin="0,120,0,0" VerticalAlignment="Top" Width="163"
+            FontSize="16"
+            Foreground="Linen"
+            />
+        <ComboBox 
+            DropDownOpened="speakersBox_DropDownOpened"
+            SelectionChanged="langBox_SelectionChanged"
+            x:Name="langBox"
+            HorizontalAlignment="Left" Height="30" 
+            Margin="0,150,0,0" 
+            VerticalAlignment="Top" Width="290"
+            FontSize="16" Background="#FF585858" BorderBrush="#FF252525"
+            />  
     </Grid>
 </Window>

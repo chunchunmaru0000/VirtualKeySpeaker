@@ -12,6 +12,7 @@ using System.Speech.AudioFormat;
 using System.Text;
 using System.Runtime.InteropServices;
 using System.Windows.Interop;
+using SettingsProviderNet;
 
 namespace VirtualKeySpeaker
 {
@@ -21,6 +22,8 @@ namespace VirtualKeySpeaker
 	public partial class MainWindow : Window
 	{
 		#region VAR
+		public SettingsProvider settingsProvider { get; set; }
+		public VKSSettings settings { get; set; }
 		SettingsWindow settingsWindow { get; set; }
 		SpeechSynthesizer synthesizer { get; set; }
 		MemoryStream soundStream { get; set; }
@@ -101,10 +104,13 @@ namespace VirtualKeySpeaker
 
 		private void InitSettings()
 		{
+			settingsProvider = new SettingsProvider(new RoamingAppDataStorage("VKS"));
+			settings = settingsProvider.GetSettings<VKSSettings>();
+
 			speakKeys = new List<Keys> { Keys.RControlKey };
 			clearKeys = new List<Keys> { Keys.RMenu };
 
-			culture = "ru-Ru";
+			culture = "ru-RU";// settings.Language;
 			voiceGender = VoiceGender.Female;
 			voiceAge = VoiceAge.Adult;
 		}
@@ -115,17 +121,24 @@ namespace VirtualKeySpeaker
 			hook.KeyDownTxt += HookKeyDownTxt;
 			hook.KeyDown += HookKeyDown;
 
+			SetSpeech(culture);
+		}
+
+		public void SetSpeech(string culture)
+		{
+			synthesizer?.Dispose();
+
 			synthesizer = new SpeechSynthesizer();
 			synthesizer.SelectVoiceByHints(
 				voiceGender,
-				voiceAge, 
+				voiceAge,
 				0,
 				new CultureInfo(culture)
 			);
 
 			soundStream = new MemoryStream();
 			synthesizer.SetOutputToAudioStream(
-				soundStream, 
+				soundStream,
 				new SpeechAudioFormatInfo(16000, AudioBitsPerSample.Sixteen, AudioChannel.Mono)
 			);
 		}
