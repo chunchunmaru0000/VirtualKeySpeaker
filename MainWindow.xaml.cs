@@ -36,7 +36,7 @@ namespace VirtualKeySpeaker
 		string culture { get; set; }
 		VoiceGender voiceGender { get; set; }
 		VoiceAge voiceAge { get; set; }
-		TimeSpan fadeTime = TimeSpan.FromSeconds(30);
+		TimeSpan fadeTime = TimeSpan.FromSeconds(60);
 		#endregion
 		#region CONST
 		const string deviceName = "CABLE Input";
@@ -49,10 +49,17 @@ namespace VirtualKeySpeaker
 			InitSettings();
 			InitHookAndSpeech();
 			InitMicro();
+
+			InitTextWindow();
 		}
 
-
 		#region INITS
+		private void InitTextWindow()
+		{
+			Left = SystemParameters.PrimaryScreenWidth - Width;
+			Top = SystemParameters.PrimaryScreenHeight - Height - 40;
+		}
+
 		private void InitMicro()
 		{
 			for (int i = 0; i < WaveOut.DeviceCount; i++)
@@ -111,13 +118,15 @@ namespace VirtualKeySpeaker
 		private void DrawText()
 		{
 			string text = string.Join("", InputKey.KeysStream.Select(k => k.Key));
-			outLabel.Content = text;
+			outLabel.Content = text.Replace("\r", "").Replace("\n", "");
 		}
 		#endregion
 		#region HOOK
 		private void HookKeyDownTxt(object sender, KeyDownTxtEventArgs e)
 		{
-			if (e.Chars.Length > 0 && e.Chars[0] != 8) // backspacve also text
+			if (e.Chars.Length > 0 && 
+				e.Chars[0] != 8 // backspacve also text
+				)
 			{
 				InputKey.KeysStream.Add(new InputKey(e.Chars, fadeTime));
 				DrawText();

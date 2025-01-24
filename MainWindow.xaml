@@ -5,9 +5,23 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:VirtualKeySpeaker"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" 
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Topmost="True"
+        ShowInTaskbar="False"
+        Height="100" Width="1920"
+        WindowStartupLocation="Manual"
+        >
     <Grid>
-        <Label x:Name="outLabel" Content="Label" HorizontalAlignment="Left" FontFamily="Cascadia Code" FontSize="50" VerticalAlignment="Top"/>
-
+        <Label x:Name="outLabel" 
+               Content="Label" 
+               HorizontalContentAlignment="Right"
+               HorizontalAlignment="Right" 
+               FontFamily="Cascadia Code" FontSize="50"
+               VerticalAlignment="Bottom"
+               Foreground="#F0000000"
+               Background="#80000000"
+               />
     </Grid>
 </Window>
