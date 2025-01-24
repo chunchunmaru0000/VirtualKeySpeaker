@@ -36,7 +36,7 @@ namespace VirtualKeySpeaker
 		string culture { get; set; }
 		VoiceGender voiceGender { get; set; }
 		VoiceAge voiceAge { get; set; }
-		TimeSpan fadeTime = TimeSpan.FromSeconds(15);
+		TimeSpan fadeTime = TimeSpan.FromSeconds(30);
 		#endregion
 		#region CONST
 		const string deviceName = "CABLE Input";
@@ -105,23 +105,15 @@ namespace VirtualKeySpeaker
 				soundStream, 
 				new SpeechAudioFormatInfo(16000, AudioBitsPerSample.Sixteen, AudioChannel.Mono)
 			);
-
-			/*
-			synthesizer.SpeakStarted += (sender, e) => isSpeaking = true;
-			synthesizer.StateChanged += (sender, e) =>
-			{
-				if (e.State == SynthesizerState.)
-					isSpeaking = false;
-			};*/
 		}
 		#endregion
-
+		#region DRAW
 		private void DrawText()
 		{
 			string text = string.Join("", InputKey.KeysStream.Select(k => k.Key));
 			outLabel.Content = text;
 		}
-
+		#endregion
 		#region HOOK
 		private void HookKeyDownTxt(object sender, KeyDownTxtEventArgs e)
 		{
@@ -150,6 +142,7 @@ namespace VirtualKeySpeaker
 				string text = string.Join("", InputKey.KeysStream.Select(k => k.Key));
 				Clear();
 
+				soundStream.SetLength(0);
 				synthesizer.Speak(text);
 				Console.WriteLine(text);
 
@@ -159,7 +152,10 @@ namespace VirtualKeySpeaker
 				if (waveProvider.BufferLength - waveProvider.BufferedBytes < buffer.Length)
 					return;
 
+				waveProvider.ClearBuffer();
 				waveProvider.AddSamples(buffer, 0, buffer.Length);
+
+				systemWaveProvider.ClearBuffer();
 				systemWaveProvider.AddSamples(buffer, 0, buffer.Length);
 			}
 		}
