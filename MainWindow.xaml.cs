@@ -21,16 +21,17 @@ namespace VirtualKeySpeaker
 	public partial class MainWindow : Window
 	{
 		#region VAR
+		SettingsWindow settingsWindow { get; set; }
 		SpeechSynthesizer synthesizer { get; set; }
 		MemoryStream soundStream { get; set; }
 		IKeyboardEvents hook { get; set; }
 		bool isSpeaking { get; set; }
 		int deviceIndex { get; set; }
 		int systemDeviceIndex { get; set; }
-		WaveOutEvent waveOutEvent { get; set; }
-		WaveOutEvent systemSound { get; set; }
-		BufferedWaveProvider waveProvider { get; set; }
-		BufferedWaveProvider systemWaveProvider { get; set; }
+		public WaveOutEvent waveOutEvent { get; set; }
+		public WaveOutEvent systemSound { get; set; }
+		public BufferedWaveProvider waveProvider { get; set; }
+		public BufferedWaveProvider systemWaveProvider { get; set; }
 		#endregion
 		#region VAR_SETTINGS
 		List<Keys> speakKeys { get; set; }
@@ -39,10 +40,9 @@ namespace VirtualKeySpeaker
 		VoiceGender voiceGender { get; set; }
 		VoiceAge voiceAge { get; set; }
 		TimeSpan fadeTime = TimeSpan.FromSeconds(60);
+		string Text { get => string.Join("", InputKey.KeysStream.Select(k => k.Key)); }
 		#endregion
 		#region CONST
-		const string deviceName = "CABLE Input";
-		const string systemDeviceName = "3S Stereo";
 		#endregion
 
 		public MainWindow()
@@ -50,38 +50,53 @@ namespace VirtualKeySpeaker
 			InitializeComponent();
 			InitSettings();
 			InitHookAndSpeech();
-			InitMicro();
-
 			InitTextWindow();
+
+			InitSettings(this);
 		}
+
 		#region INITS
+		private void InitSettings(MainWindow mainWindow)
+		{
+			settingsWindow = new SettingsWindow(mainWindow);
+			settingsWindow.Show();
+		}
+
 		private void InitTextWindow()
 		{
 			Left = SystemParameters.PrimaryScreenWidth - Width;
 			Top = SystemParameters.PrimaryScreenHeight - Height - 40;
 		}
 
-		private void InitMicro()
+		public void SetMicro(string name)
 		{
+			waveOutEvent?.Dispose();
+
 			for (int i = 0; i < WaveOut.DeviceCount; i++)
-			{
-				WaveOutCapabilities data = WaveOut.GetCapabilities(i);
-					Console.WriteLine(data.ProductName);
-				if (data.ProductName.Contains(deviceName))
+				if (WaveOut.GetCapabilities(i).ProductName.Contains(name))
 					deviceIndex = i;
-				else if (data.ProductName.Contains(systemDeviceName))
-					systemDeviceIndex = i;
-			}
 
 			waveOutEvent = new WaveOutEvent() { DeviceNumber = deviceIndex };
 			waveProvider = new BufferedWaveProvider(new WaveFormat(16000, 1)) { BufferDuration = TimeSpan.FromMinutes(1) };
 			waveOutEvent.Init(waveProvider);
 			waveOutEvent.Play();
 
+			Console.WriteLine(name);
+		}
+
+		public void SetSpeaker(string name)
+		{
+			systemSound?.Dispose();
+			for (int i = 0; i < WaveOut.DeviceCount; i++)
+				if (WaveOut.GetCapabilities(i).ProductName.Contains(name))
+					systemDeviceIndex = i;
+
 			systemSound = new WaveOutEvent() { DeviceNumber = systemDeviceIndex };
 			systemWaveProvider = new BufferedWaveProvider(new WaveFormat(16000, 1)) { BufferDuration = TimeSpan.FromMinutes(1) };
 			systemSound.Init(systemWaveProvider);
 			systemSound.Play();
+
+			Console.WriteLine(name);
 		}
 
 		private void InitSettings()
@@ -118,8 +133,7 @@ namespace VirtualKeySpeaker
 		#region DRAW
 		private void DrawText()
 		{
-			string text = string.Join("", InputKey.KeysStream.Select(k => k.Key));
-			outLabel.Content = text.Replace("\r", "").Replace("\n", "");
+			outLabel.Content = Text.Replace("\r", "").Replace("\n", "");
 		}
 		#endregion
 		#region HOOK
@@ -134,7 +148,6 @@ namespace VirtualKeySpeaker
 			}
 		}
 
-
 		private void HookKeyDown(object sender, KeyEventArgs e)
 		{
 			if (speakKeys.Contains(e.KeyCode))
@@ -147,9 +160,13 @@ namespace VirtualKeySpeaker
 
 		void Speak()
 		{
-			if (!isSpeaking)
+			if (
+				!isSpeaking && 
+				waveProvider != null && 
+				systemWaveProvider != null
+				)
 			{
-				string text = string.Join("", InputKey.KeysStream.Select(k => k.Key));
+				string text = Text;
 				Clear();
 
 				// todo: dont clear stream and just next messages play after this
@@ -184,12 +201,13 @@ namespace VirtualKeySpeaker
 			DrawText();
 		}
 		#endregion
-
+		#region OVERRIDE
 		protected override void OnSourceInitialized(EventArgs e)
 		{
 			base.OnSourceInitialized(e);
 			var hwnd = new WindowInteropHelper(this).Handle;
 			WindowsServices.SetWindowExTransparent(hwnd);
 		}
+		#endregion
 	}
 }

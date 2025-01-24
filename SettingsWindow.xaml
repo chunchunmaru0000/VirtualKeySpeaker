@@ -1,0 +1,52 @@
+﻿<Window x:Class="VirtualKeySpeaker.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:VirtualKeySpeaker"
+        mc:Ignorable="d"
+        Title="SettingsWindow" Height="450" Width="800"
+        FontFamily="Cascadia Code" Background="#FF2B2B2B"
+        ShowInTaskbar="True"
+        Closed="Window_Closed"
+        StateChanged="Window_StateChanged"
+        >
+
+    <Grid>
+        <Label 
+            Content="Micro" 
+            HorizontalAlignment="Left" Height="26" 
+            Margin="0,0,0,0" VerticalAlignment="Top" Width="163"
+            FontSize="16"
+            Foreground="Linen"
+            />
+
+        <ComboBox 
+            DropDownOpened="microsBox_DropDownOpened"
+            SelectionChanged="microsBox_SelectionChanged"
+            x:Name="microsBox"
+            HorizontalAlignment="Left" Height="26" 
+            Margin="0,26,0,0" 
+            VerticalAlignment="Top" Width="290"
+            FontSize="16" Background="#FF585858" BorderBrush="#FF252525"
+            />
+
+        <Label 
+            Content="System speaker" 
+            HorizontalAlignment="Left" Height="26" 
+            Margin="0,52,0,0" VerticalAlignment="Top" Width="163"
+            FontSize="16"
+            Foreground="Linen"
+            />
+
+        <ComboBox 
+            DropDownOpened="speakersBox_DropDownOpened"
+            SelectionChanged="speakersBox_SelectionChanged"
+            x:Name="speakersBox"
+            HorizontalAlignment="Left" Height="26" 
+            Margin="0,78,0,0" 
+            VerticalAlignment="Top" Width="290"
+            FontSize="16" Background="#FF585858" BorderBrush="#FF252525"
+            />      
+    </Grid>
+</Window>
