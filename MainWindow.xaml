@@ -10,18 +10,23 @@
         AllowsTransparency="True"
         Topmost="True"
         ShowInTaskbar="False"
-        Height="100" Width="1920"
-        WindowStartupLocation="Manual"
+        Height="80" Width="1920"
+        Focusable="False"
+        IsHitTestVisible="False"
+        WindowStartupLocation="Manual" Background="#00FFFFFF"
         >
-    <Grid>
+    <Grid IsHitTestVisible="False"
+          Focusable="False">
         <Label x:Name="outLabel" 
                Content="Label" 
                HorizontalContentAlignment="Right"
                HorizontalAlignment="Right" 
                FontFamily="Cascadia Code" FontSize="50"
                VerticalAlignment="Bottom"
-               Foreground="#F0000000"
-               Background="#80000000"
+               Foreground="#FF000000"
+               Background="#20FFFFFF"
+               Focusable="False"
+               IsHitTestVisible="False"
                />
     </Grid>
 </Window>

@@ -10,6 +10,8 @@ using NAudio.Wave;
 using System.IO;
 using System.Speech.AudioFormat;
 using System.Text;
+using System.Runtime.InteropServices;
+using System.Windows.Interop;
 
 namespace VirtualKeySpeaker
 {
@@ -52,7 +54,6 @@ namespace VirtualKeySpeaker
 
 			InitTextWindow();
 		}
-
 		#region INITS
 		private void InitTextWindow()
 		{
@@ -151,6 +152,7 @@ namespace VirtualKeySpeaker
 				string text = string.Join("", InputKey.KeysStream.Select(k => k.Key));
 				Clear();
 
+				// todo: dont clear stream and just next messages play after this
 				soundStream.SetLength(0);
 				synthesizer.Speak(text);
 				Console.WriteLine(text);
@@ -182,5 +184,12 @@ namespace VirtualKeySpeaker
 			DrawText();
 		}
 		#endregion
+
+		protected override void OnSourceInitialized(EventArgs e)
+		{
+			base.OnSourceInitialized(e);
+			var hwnd = new WindowInteropHelper(this).Handle;
+			WindowsServices.SetWindowExTransparent(hwnd);
+		}
 	}
 }
