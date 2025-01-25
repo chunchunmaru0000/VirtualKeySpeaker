@@ -38,8 +38,8 @@ namespace VirtualKeySpeaker
 		public BufferedWaveProvider systemWaveProvider { get; set; }
 		#endregion
 		#region VAR_SETTINGS
-		List<Keys> speakKeys { get; set; }
-		List<Keys> clearKeys { get; set; }
+		Keys speakKeys { get; set; }
+		Keys clearKeys { get; set; }
 		string culture { get; set; }
 		VoiceGender voiceGender { get; set; }
 		VoiceAge voiceAge { get; set; }
@@ -87,6 +87,9 @@ namespace VirtualKeySpeaker
 				waveProvider = new BufferedWaveProvider(new WaveFormat(16000, 1)) { BufferDuration = TimeSpan.FromMinutes(1) };
 				waveOutEvent.Init(waveProvider);
 				waveOutEvent.Play();
+
+				settings.InputDevice = name;
+				SaveSettings();
 			}
 			catch { success = false; }
 
@@ -108,6 +111,9 @@ namespace VirtualKeySpeaker
 				systemWaveProvider = new BufferedWaveProvider(new WaveFormat(16000, 1)) { BufferDuration = TimeSpan.FromMinutes(1) };
 				systemSound.Init(systemWaveProvider);
 				systemSound.Play();
+
+				settings.OutDevice = name;
+				SaveSettings();
 			}
 			catch { success = false; }
 
@@ -115,20 +121,26 @@ namespace VirtualKeySpeaker
 			Console.WriteLine($"{name} {success}");
 		}
 
+		public void SaveSettings() => settingsProvider.SaveSettings(settings);
+
 		private void InitSettings()
 		{
 			RoamingAppDataStorage storage = new RoamingAppDataStorage("VKS");
 			
 			settingsProvider = new SettingsProvider(new RoamingAppDataStorage("VKS"));
 			settings = settingsProvider.GetSettings<VKSSettings>();
-			settingsWindow.SetLangBoxName($"{settings.Language}{settings.LangName}");
+			settingsWindow.SetLangBoxName($"{settings.Language}|{settings.LangName}");
+			//settingsWindow.SetLangBoxUnEditable();
 
-			speakKeys = settings.SpeakKeys.ToList();
-			clearKeys = settings.ClearKeys.ToList();
+			speakKeys = settings.SpeakKeys;
+			clearKeys = settings.ClearKeys;
 			
 			culture = settings.Language;
 			voiceGender = VoiceGender.Female;
 			voiceAge = VoiceAge.Adult;
+
+			SetMicro(settings.InputDevice);
+			SetSpeaker(settings.OutDevice);
 		}
 
 		private void InitHookAndSpeech()
@@ -179,9 +191,9 @@ namespace VirtualKeySpeaker
 
 		private void HookKeyDown(object sender, KeyEventArgs e)
 		{
-			if (speakKeys.Contains(e.KeyCode))
+			if (speakKeys == e.KeyCode)
 				Speak();
-			else if (clearKeys.Contains(e.KeyCode))
+			else if (clearKeys == e.KeyCode)
 				Clear();
 			else if (e.KeyCode == Keys.Back)
 				DeleteLast();

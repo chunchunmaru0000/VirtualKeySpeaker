@@ -75,12 +75,31 @@
             Foreground="Linen"
             />
         <ComboBox 
+            IsEditable="True"
             SelectionChanged="langBox_SelectionChanged"
             x:Name="langBox"
             HorizontalAlignment="Left" Height="30" 
             Margin="0,150,0,0" 
             VerticalAlignment="Top" Width="290"
             FontSize="16" Background="#FF585858" BorderBrush="#FF252525"
-            />  
+            />
+
+        <Label 
+            x:Name="keyLabel"
+            Content="Speak key: RControl" 
+            HorizontalAlignment="Left" Height="30" 
+            Margin="0,180,0,0" VerticalAlignment="Top" Width="290"
+            FontSize="16"
+            Foreground="Linen"
+            />
+        <Button
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            Height="30" Width="290"
+            Margin="0,210,0,0"
+            FontSize="16"
+            Content="Press to select and press key"
+            Click="SelectKey"
+            ></Button>
     </Grid>
 </Window>

@@ -33,6 +33,8 @@ namespace VirtualKeySpeaker
 			langBox.Text = text;
 		}
 
+		public void SetLangBoxUnEditable() => langBox.IsEditable = false;
+
 		private void Window_Closed(object sender, EventArgs e)
 		{
 			Environment.Exit(0);
@@ -89,7 +91,14 @@ namespace VirtualKeySpeaker
 			if (langBox.SelectedItem == null)
 				return;
 
-			mainWindow.SetSpeech(langBox.SelectedItem.ToString().Split('|')[0]);
+			string[] lang = langBox.SelectedItem.ToString().Split('|');
+
+			mainWindow.SetSpeech(lang[0]);
+
+			mainWindow.settings.Language = lang[0];
+			mainWindow.settings.Language = lang[1];
+			mainWindow.SaveSettings();
+
 			Focus();
 		}
 
@@ -101,6 +110,11 @@ namespace VirtualKeySpeaker
 		public void SetSpeakerRect(bool success)
 		{
 			speakerRect.Fill = success ? Brushes.LightGreen : Brushes.LightCoral;
+		}
+
+		private void SelectKey(object sender, RoutedEventArgs e)
+		{
+			
 		}
 	}
 }
