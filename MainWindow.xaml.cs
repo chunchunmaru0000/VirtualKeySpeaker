@@ -29,7 +29,6 @@ namespace VirtualKeySpeaker
 		SpeechSynthesizer synthesizer { get; set; }
 		MemoryStream soundStream { get; set; }
 		IKeyboardEvents hook { get; set; }
-		bool isSpeaking { get; set; }
 		int deviceIndex { get; set; }
 		int systemDeviceIndex { get; set; }
 		public WaveOutEvent waveOutEvent { get; set; }
@@ -38,13 +37,14 @@ namespace VirtualKeySpeaker
 		public BufferedWaveProvider systemWaveProvider { get; set; }
 		#endregion
 		#region VAR_SETTINGS
-		Keys speakKeys { get; set; }
-		Keys clearKeys { get; set; }
+		public Keys speakKeys { get; set; }
+		public Keys clearKeys { get; set; }
 		string culture { get; set; }
 		VoiceGender voiceGender { get; set; }
 		VoiceAge voiceAge { get; set; }
-		TimeSpan fadeTime = TimeSpan.FromSeconds(60);
+		TimeSpan fadeTime { get; } = TimeSpan.FromSeconds(60);
 		string Text { get => string.Join("", InputKey.KeysStream.Select(k => k.Key)); }
+		public bool isSelectingKey { get; set; }
 		#endregion
 		#region CONST
 		#endregion
@@ -56,7 +56,6 @@ namespace VirtualKeySpeaker
 			InitSettings();
 			InitHookAndSpeech();
 			InitTextWindow();
-
 		}
 
 		#region INITS
@@ -70,6 +69,41 @@ namespace VirtualKeySpeaker
 		{
 			Left = SystemParameters.PrimaryScreenWidth - Width;
 			Top = SystemParameters.PrimaryScreenHeight - Height - 40;
+		}
+
+		private void InitSettings()
+		{
+			RoamingAppDataStorage storage = new RoamingAppDataStorage("VKS");
+			
+			settingsProvider = new SettingsProvider(new RoamingAppDataStorage("VKS"));
+			settings = settingsProvider.GetSettings<VKSSettings>();
+			settingsWindow.SetLangBoxName($"{settings.Language}|{settings.LangName}");
+			//settingsWindow.SetLangBoxUnEditable();
+
+			speakKeys = settings.SpeakKeys;
+			settingsWindow.SetKeyLabelTextKey(speakKeys.ToString());
+
+			clearKeys = settings.ClearKeys;
+			
+			culture = settings.Language;
+			voiceGender = VoiceGender.Female;
+			voiceAge = VoiceAge.Adult;
+
+			SetMicro(settings.InputDevice);
+			settingsWindow.SetInputDeviceText(settings.InputDevice);
+
+			SetSpeaker(settings.OutDevice);
+			settingsWindow.SetOurDeviceText(settings.OutDevice);
+		}
+		#endregion
+		#region SET
+		private void InitHookAndSpeech()
+		{
+			hook = Hook.GlobalEvents();
+			hook.KeyDownTxt += HookKeyDownTxt;
+			hook.KeyDown += HookKeyDown;
+
+			SetSpeech(culture);
 		}
 
 		public void SetMicro(string name)
@@ -123,35 +157,6 @@ namespace VirtualKeySpeaker
 
 		public void SaveSettings() => settingsProvider.SaveSettings(settings);
 
-		private void InitSettings()
-		{
-			RoamingAppDataStorage storage = new RoamingAppDataStorage("VKS");
-			
-			settingsProvider = new SettingsProvider(new RoamingAppDataStorage("VKS"));
-			settings = settingsProvider.GetSettings<VKSSettings>();
-			settingsWindow.SetLangBoxName($"{settings.Language}|{settings.LangName}");
-			//settingsWindow.SetLangBoxUnEditable();
-
-			speakKeys = settings.SpeakKeys;
-			clearKeys = settings.ClearKeys;
-			
-			culture = settings.Language;
-			voiceGender = VoiceGender.Female;
-			voiceAge = VoiceAge.Adult;
-
-			SetMicro(settings.InputDevice);
-			SetSpeaker(settings.OutDevice);
-		}
-
-		private void InitHookAndSpeech()
-		{
-			hook = Hook.GlobalEvents();
-			hook.KeyDownTxt += HookKeyDownTxt;
-			hook.KeyDown += HookKeyDown;
-
-			SetSpeech(culture);
-		}
-
 		public void SetSpeech(string culture)
 		{
 			synthesizer?.Dispose();
@@ -177,6 +182,8 @@ namespace VirtualKeySpeaker
 			outLabel.Content = Text.Replace("\r", "").Replace("\n", "");
 		}
 		#endregion
+		// todo: better keyhook
+		// todo: speak buffer
 		#region HOOK
 		private void HookKeyDownTxt(object sender, KeyDownTxtEventArgs e)
 		{
@@ -191,6 +198,8 @@ namespace VirtualKeySpeaker
 
 		private void HookKeyDown(object sender, KeyEventArgs e)
 		{
+			if (isSelectingKey)
+				settingsWindow.SelectedKey(e.KeyCode);
 			if (speakKeys == e.KeyCode)
 				Speak();
 			else if (clearKeys == e.KeyCode)
@@ -201,8 +210,7 @@ namespace VirtualKeySpeaker
 
 		void Speak()
 		{
-			if (
-				!isSpeaking && 
+			if ( 
 				waveProvider != null && 
 				systemWaveProvider != null
 				)

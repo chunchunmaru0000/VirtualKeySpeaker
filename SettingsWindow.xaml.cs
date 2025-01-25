@@ -3,6 +3,8 @@ using System;
 using System.Globalization;
 using System.Linq;
 using System.Windows;
+using System.Windows.Forms;
+using System.Windows.Input;
 using System.Windows.Media;
 
 namespace VirtualKeySpeaker
@@ -13,6 +15,9 @@ namespace VirtualKeySpeaker
 	public partial class SettingsWindow : Window
 	{
 		MainWindow mainWindow { get; set; }
+		#region CONST
+		const string keyLabelText = "Speak key";
+		#endregion
 
 		public SettingsWindow(MainWindow mainWindow)
 		{
@@ -26,15 +31,20 @@ namespace VirtualKeySpeaker
 		{
 			foreach (CultureInfo cultureInfo in CultureInfo.GetCultures(CultureTypes.NeutralCultures))
 				langBox.Items.Add($"{cultureInfo.Name}|{cultureInfo.DisplayName}");
-		}
 
-		public void SetLangBoxName(string text)
-		{
-			langBox.Text = text;
+			keyLabel.Content = $"{keyLabelText}: {mainWindow.speakKeys}";
 		}
+		#region SET_TEXT
+		public void SetLangBoxName(string text) => langBox.Text = text;
+
+		public void SetKeyLabelTextKey(string text) => keyLabel.Content = $"{keyLabelText}: {text}";
+
+		public void SetOurDeviceText(string text) => speakersBox.Text = text;
+
+		public void SetInputDeviceText(string text) => microsBox.Text = text;
 
 		public void SetLangBoxUnEditable() => langBox.IsEditable = false;
-
+		#endregion
 		private void Window_Closed(object sender, EventArgs e)
 		{
 			Environment.Exit(0);
@@ -114,7 +124,21 @@ namespace VirtualKeySpeaker
 
 		private void SelectKey(object sender, RoutedEventArgs e)
 		{
-			
+			mainWindow.isSelectingKey = true;
+			keyRect.Fill = Brushes.LightGreen;
+		}
+
+		public void SelectedKey(Keys key)
+		{
+			mainWindow.isSelectingKey = false;
+			keyRect.Fill = Brushes.LightCoral;
+
+			Console.WriteLine(key);
+			keyLabel.Content = $"{keyLabelText}: {key}";
+
+			mainWindow.settings.SpeakKeys = key;
+			mainWindow.speakKeys = key;
+			mainWindow.SaveSettings();
 		}
 	}
 }

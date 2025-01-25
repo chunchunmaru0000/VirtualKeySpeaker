@@ -21,6 +21,7 @@
             Foreground="Linen"
             />
         <ComboBox 
+            IsEditable="True"
             DropDownOpened="microsBox_DropDownOpened"
             SelectionChanged="microsBox_SelectionChanged"
             x:Name="microsBox"
@@ -48,6 +49,7 @@
             Foreground="Linen"
             />
         <ComboBox 
+            IsEditable="True"
             DropDownOpened="speakersBox_DropDownOpened"
             SelectionChanged="speakersBox_SelectionChanged"
             x:Name="speakersBox"
@@ -101,5 +103,15 @@
             Content="Press to select and press key"
             Click="SelectKey"
             ></Button>
+        <Rectangle 
+            x:Name="keyRect"
+            Width="20" Height="20"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            Margin="295,215,0,0"
+            Fill="LightCoral"
+            StrokeThickness="2"
+            Stroke="Black"
+            ></Rectangle>
     </Grid>
 </Window>
