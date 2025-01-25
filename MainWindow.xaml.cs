@@ -37,6 +37,7 @@ namespace VirtualKeySpeaker
 		public BufferedWaveProvider waveProvider { get; set; }
 		public BufferedWaveProvider systemWaveProvider { get; set; }
 		string lastClipboardText { get; set; } = "";
+		bool hideOutLabel { get; set; }
 		#endregion
 		#region VAR_SETTINGS
 		public Keys speakKeys { get; set; }
@@ -120,7 +121,7 @@ namespace VirtualKeySpeaker
 
 			bufferKeys = settings.BufferKeys;
 			settingsWindow.SetBufferKeyLabelTextKey(bufferKeys.ToString());
-			
+
 			culture = settings.Language;
 			voiceGender = VoiceGender.Female;
 			voiceAge = VoiceAge.Adult;
@@ -216,6 +217,13 @@ namespace VirtualKeySpeaker
 		private void DrawText()
 		{
 			outLabel.Content = Text.Replace("\r", "").Replace("\n", "");
+			if (hideOutLabel)
+			{
+				hideOutLabel = false;
+				return;
+			}
+			if (outLabel.Height == 0)
+				outLabel.Height = 75;
 		}
 		#endregion
 		// todo: better keyhook
@@ -223,7 +231,8 @@ namespace VirtualKeySpeaker
 		private void HookKeyDownTxt(object sender, KeyDownTxtEventArgs e)
 		{
 			if (e.Chars.Length > 0 && 
-				e.Chars[0] != 8 // backspacve also text
+				e.Chars[0] != 8 && // backspacve also text
+				e.Chars[0] != '\t'
 				)
 			{
 				InputKey.KeysStream.Add(new InputKey(e.Chars, fadeTime));
@@ -277,13 +286,18 @@ namespace VirtualKeySpeaker
 		void DeleteLast()
 		{
 			InputKey.DeleteLast();
+			if (InputKey.KeysStream.Count == 0)
+				outLabel.Height = 0;
+			hideOutLabel = true;
 			DrawText();
 		}
 
 		void Clear()
 		{
 			outLabel.Content = "";
+			outLabel.Height = 0;
 			InputKey.Clear();
+			hideOutLabel = true;
 			DrawText();
 		}
 		#endregion
