@@ -73,33 +73,45 @@ namespace VirtualKeySpeaker
 
 		public void SetMicro(string name)
 		{
-			waveOutEvent?.Dispose();
+			bool success = true;
+			try
+			{
+				waveOutEvent?.Dispose();
 
-			for (int i = 0; i < WaveOut.DeviceCount; i++)
-				if (WaveOut.GetCapabilities(i).ProductName.Contains(name))
-					deviceIndex = i;
+				for (int i = 0; i < WaveOut.DeviceCount; i++)
+					if (WaveOut.GetCapabilities(i).ProductName.Contains(name))
+						deviceIndex = i;
 
-			waveOutEvent = new WaveOutEvent() { DeviceNumber = deviceIndex };
-			waveProvider = new BufferedWaveProvider(new WaveFormat(16000, 1)) { BufferDuration = TimeSpan.FromMinutes(1) };
-			waveOutEvent.Init(waveProvider);
-			waveOutEvent.Play();
+				waveOutEvent = new WaveOutEvent() { DeviceNumber = deviceIndex };
+				waveProvider = new BufferedWaveProvider(new WaveFormat(16000, 1)) { BufferDuration = TimeSpan.FromMinutes(1) };
+				waveOutEvent.Init(waveProvider);
+				waveOutEvent.Play();
+			}
+			catch { success = false; }
 
-			Console.WriteLine(name);
+			settingsWindow.SetMicroRect(success);
+			Console.WriteLine($"{name} {success}");
 		}
 
 		public void SetSpeaker(string name)
 		{
-			systemSound?.Dispose();
-			for (int i = 0; i < WaveOut.DeviceCount; i++)
-				if (WaveOut.GetCapabilities(i).ProductName.Contains(name))
-					systemDeviceIndex = i;
+			bool success = true;
+			try
+			{
+				systemSound?.Dispose();
+				for (int i = 0; i < WaveOut.DeviceCount; i++)
+					if (WaveOut.GetCapabilities(i).ProductName.Contains(name))
+						systemDeviceIndex = i;
 
-			systemSound = new WaveOutEvent() { DeviceNumber = systemDeviceIndex };
-			systemWaveProvider = new BufferedWaveProvider(new WaveFormat(16000, 1)) { BufferDuration = TimeSpan.FromMinutes(1) };
-			systemSound.Init(systemWaveProvider);
-			systemSound.Play();
+				systemSound = new WaveOutEvent() { DeviceNumber = systemDeviceIndex };
+				systemWaveProvider = new BufferedWaveProvider(new WaveFormat(16000, 1)) { BufferDuration = TimeSpan.FromMinutes(1) };
+				systemSound.Init(systemWaveProvider);
+				systemSound.Play();
+			}
+			catch { success = false; }
 
-			Console.WriteLine(name);
+			settingsWindow.SetSpeakerRect(success);
+			Console.WriteLine($"{name} {success}");
 		}
 
 		private void InitSettings()

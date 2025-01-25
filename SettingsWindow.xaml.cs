@@ -1,7 +1,9 @@
 ﻿using NAudio.Wave;
 using System;
 using System.Globalization;
+using System.Linq;
 using System.Windows;
+using System.Windows.Media;
 
 namespace VirtualKeySpeaker
 {
@@ -22,9 +24,8 @@ namespace VirtualKeySpeaker
 
 		private void InitSomeBoxes()
 		{
-			foreach (CultureInfo cultureInfo in CultureInfo.GetCultures(CultureTypes.AllCultures))
+			foreach (CultureInfo cultureInfo in CultureInfo.GetCultures(CultureTypes.NeutralCultures))
 				langBox.Items.Add($"{cultureInfo.Name}|{cultureInfo.DisplayName}");
-
 			langBox.Text = mainWindow.settings.Language;
 		}
 
@@ -86,6 +87,16 @@ namespace VirtualKeySpeaker
 
 			mainWindow.SetSpeech(langBox.SelectedItem.ToString().Split('|')[0]);
 			Focus();
+		}
+
+		public void SetMicroRect(bool success)
+		{
+			microRect.Fill = success ? Brushes.LightGreen : Brushes.LightCoral;
+		}
+
+		public void SetSpeakerRect(bool success)
+		{
+			speakerRect.Fill = success ? Brushes.LightGreen : Brushes.LightCoral;
 		}
 	}
 }

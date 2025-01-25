@@ -29,6 +29,16 @@
             VerticalAlignment="Top" Width="290"
             FontSize="16" Background="#FF585858" BorderBrush="#FF252525"
             />
+        <Rectangle 
+            x:Name="microRect"
+            Width="20" Height="20"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            Margin="295,35,0,0"
+            Fill="LightCoral"
+            StrokeThickness="2"
+            Stroke="Black"
+            ></Rectangle>
 
         <Label 
             Content="System speaker" 
@@ -46,6 +56,16 @@
             VerticalAlignment="Top" Width="290"
             FontSize="16" Background="#FF585858" BorderBrush="#FF252525"
             />
+        <Rectangle 
+            x:Name="speakerRect"
+            Width="20" Height="20"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            Margin="295,95,0,0"
+            Fill="LightCoral"
+            StrokeThickness="2"
+            Stroke="Black"
+            ></Rectangle>
 
         <Label 
             Content="Language speaks" 
@@ -55,7 +75,6 @@
             Foreground="Linen"
             />
         <ComboBox 
-            DropDownOpened="speakersBox_DropDownOpened"
             SelectionChanged="langBox_SelectionChanged"
             x:Name="langBox"
             HorizontalAlignment="Left" Height="30" 
