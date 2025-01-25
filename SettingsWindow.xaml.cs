@@ -19,6 +19,7 @@ namespace VirtualKeySpeaker
 		#region CONST
 		const string keyLabelText = "Speak key";
 		const string clearKeyLabelText = "Clear key";
+		const string bufferKeyLabelText = "Buffer speak key";
 		#endregion
 
 		public SettingsWindow(MainWindow mainWindow)
@@ -43,6 +44,8 @@ namespace VirtualKeySpeaker
 
 		public void SetClearKeyLabelTextKey(string text) => clearKeyLabel.Content = $"{clearKeyLabelText}: {text}";
 
+		public void SetBufferKeyLabelTextKey(string text) => bufferKeyLabel.Content = $"{bufferKeyLabelText}: {text}";
+
 		public void SetOurDeviceText(string text) => speakersBox.Text = text;
 
 		public void SetInputDeviceText(string text) => microsBox.Text = text;
@@ -50,7 +53,11 @@ namespace VirtualKeySpeaker
 		public void SetLangBoxUnEditable() => langBox.IsEditable = false;
 		#endregion
 		#region HANDLERS
-		private void Window_Closed(object sender, EventArgs e) => App.Current.Shutdown(0);
+		private void Window_Closed(object sender, EventArgs e)
+		{
+			App.Current.Shutdown(0);
+			Environment.Exit(0);
+		}
 
 		private void speakersBox_DropDownOpened(object sender, EventArgs e)
 		{
@@ -139,6 +146,13 @@ namespace VirtualKeySpeaker
 			selectingKey = SelectingKey.Clear;
 		}
 
+		private void SelectBufferKey(object sender, RoutedEventArgs e)
+		{
+			mainWindow.isSelectingKey = true;
+			bufferKeyRect.Fill = Brushes.LightGreen;
+			selectingKey = SelectingKey.Buffer;
+		}
+
 		public void SelectedKey(Keys key)
 		{
 			mainWindow.isSelectingKey = false;
@@ -160,6 +174,13 @@ namespace VirtualKeySpeaker
 					mainWindow.settings.ClearKeys = key;
 					mainWindow.clearKeys = key;
 					break;
+				case SelectingKey.Buffer:
+					bufferKeyRect.Fill = Brushes.LightCoral;
+					bufferKeyLabel.Content = $"{bufferKeyLabelText}: {key}";
+
+					mainWindow.settings.BufferKeys = key;
+					mainWindow.bufferKeys = key;
+					break;
 				case SelectingKey.None:
 					break;
 				default:
@@ -175,6 +196,7 @@ namespace VirtualKeySpeaker
 	{
 		Speak,
 		Clear,
+		Buffer,
 		None,
 	}
 }

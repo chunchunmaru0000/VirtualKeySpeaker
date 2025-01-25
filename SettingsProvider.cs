@@ -20,6 +20,9 @@ namespace VirtualKeySpeaker
 		[DefaultValue(Keys.RMenu)]
 		public Keys ClearKeys { get; set; }
 
+		[DefaultValue(Keys.F9)]
+		public Keys BufferKeys { get; set; }
+
 		[DefaultValue("")]
 		public string OutDevice { get; set; }
 

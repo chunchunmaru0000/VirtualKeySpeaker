@@ -141,5 +141,33 @@
             StrokeThickness="2"
             Stroke="Black"
             ></Rectangle>
+
+        <Label 
+            x:Name="bufferKeyLabel"
+            Content="Buffer speak key: F9" 
+            HorizontalAlignment="Left" Height="30" 
+            Margin="0,300,0,0" VerticalAlignment="Top" Width="290"
+            FontSize="16"
+            Foreground="Linen"
+            />
+        <Button
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            Height="30" Width="290"
+            Margin="0,330,0,0"
+            FontSize="16"
+            Content="Click to select and press key"
+            Click="SelectBufferKey"
+            ></Button>
+        <Rectangle 
+            x:Name="bufferKeyRect"
+            Width="20" Height="20"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            Margin="295,335,0,0"
+            Fill="LightCoral"
+            StrokeThickness="2"
+            Stroke="Black"
+            ></Rectangle>
     </Grid>
 </Window>

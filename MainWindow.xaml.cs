@@ -14,6 +14,7 @@ using System.Runtime.InteropServices;
 using System.Windows.Interop;
 using SettingsProviderNet;
 using System.Diagnostics;
+using System.Threading;
 
 namespace VirtualKeySpeaker
 {
@@ -35,10 +36,12 @@ namespace VirtualKeySpeaker
 		public WaveOutEvent systemSound { get; set; }
 		public BufferedWaveProvider waveProvider { get; set; }
 		public BufferedWaveProvider systemWaveProvider { get; set; }
+		string lastClipboardText { get; set; } = "";
 		#endregion
 		#region VAR_SETTINGS
 		public Keys speakKeys { get; set; }
 		public Keys clearKeys { get; set; }
+		public Keys bufferKeys { get; set; }
 		string culture { get; set; }
 		VoiceGender voiceGender { get; set; }
 		VoiceAge voiceAge { get; set; }
@@ -52,13 +55,42 @@ namespace VirtualKeySpeaker
 		public MainWindow()
 		{
 			InitializeComponent();
+			InitClipboard();
 			InitSettings(this);
 			InitSettings();
 			InitHookAndSpeech();
 			InitTextWindow();
+
+			System.Windows.Clipboard.ContainsText();
 		}
 
 		#region INITS
+		private void InitClipboard()
+		{
+			Thread clipboardThread = new Thread(() =>
+			{
+				while (true)
+				{
+					if (System.Windows.Clipboard.ContainsText())
+					{
+						try
+						{
+							string text = System.Windows.Clipboard.GetText();
+							if (text != lastClipboardText)
+							{
+								lastClipboardText = text;
+								Console.WriteLine(lastClipboardText);
+							}
+						} catch { }
+					}
+					Thread.Sleep(50);
+				}
+			});
+
+			clipboardThread.SetApartmentState(ApartmentState.STA);
+			clipboardThread.Start();
+		}
+
 		private void InitSettings(MainWindow mainWindow)
 		{
 			settingsWindow = new SettingsWindow(mainWindow);
@@ -85,6 +117,9 @@ namespace VirtualKeySpeaker
 
 			clearKeys = settings.ClearKeys;
 			settingsWindow.SetClearKeyLabelTextKey(clearKeys.ToString());
+
+			bufferKeys = settings.BufferKeys;
+			settingsWindow.SetBufferKeyLabelTextKey(bufferKeys.ToString());
 			
 			culture = settings.Language;
 			voiceGender = VoiceGender.Female;
@@ -184,7 +219,6 @@ namespace VirtualKeySpeaker
 		}
 		#endregion
 		// todo: better keyhook
-		// todo: speak buffer
 		#region HOOK
 		private void HookKeyDownTxt(object sender, KeyDownTxtEventArgs e)
 		{
@@ -201,7 +235,9 @@ namespace VirtualKeySpeaker
 		{
 			if (isSelectingKey)
 				settingsWindow.SelectedKey(e.KeyCode);
-			if (speakKeys == e.KeyCode)
+			else if (bufferKeys == e.KeyCode)
+				Speak(lastClipboardText);
+			else if (speakKeys == e.KeyCode)
 				Speak();
 			else if (clearKeys == e.KeyCode)
 				Clear();
@@ -209,14 +245,14 @@ namespace VirtualKeySpeaker
 				DeleteLast();
 		}
 
-		void Speak()
+		void Speak(string spokenText = "")
 		{
 			if ( 
 				waveProvider != null && 
 				systemWaveProvider != null
 				)
 			{
-				string text = Text;
+				string text = spokenText == "" ? Text : spokenText;
 				Clear();
 
 				// todo: dont clear stream and just next messages play after this

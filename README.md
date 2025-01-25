@@ -13,6 +13,7 @@ If you want to speak synthesized speech to some app then need to specify input d
 in that app the same as 'Microphone' in this.
 
 Speech synthesizer spoken language can be specified as well as some other controls.<br>
-'Speak key' is a key after pressing which inputed text will be spoken.<br>
-'Clear key' is a key after pressing which inputed text will be cleared.<br>
+'Speak key' is a key after pressing which inputted text will be spoken.<br>
+'Clear key' is a key after pressing which inputted text will be cleared.<br>
 Text input can be cleared by one char by pressing backspace.<br>
+'Buffer speak key' is a key after pressing which text from clipboard buffer will be spoken.<br>
