@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:VirtualKeySpeaker"
         mc:Ignorable="d"
-        Title="SettingsWindow" Height="450" Width="800"
+        Title="SettingsWindow" Height="450" Width="335"
         FontFamily="Cascadia Code" Background="#FF2B2B2B"
         ShowInTaskbar="True"
         Closed="Window_Closed"

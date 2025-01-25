@@ -13,6 +13,7 @@ using System.Text;
 using System.Runtime.InteropServices;
 using System.Windows.Interop;
 using SettingsProviderNet;
+using System.Diagnostics;
 
 namespace VirtualKeySpeaker
 {
@@ -51,11 +52,11 @@ namespace VirtualKeySpeaker
 		public MainWindow()
 		{
 			InitializeComponent();
+			InitSettings(this);
 			InitSettings();
 			InitHookAndSpeech();
 			InitTextWindow();
 
-			InitSettings(this);
 		}
 
 		#region INITS
@@ -116,13 +117,16 @@ namespace VirtualKeySpeaker
 
 		private void InitSettings()
 		{
+			RoamingAppDataStorage storage = new RoamingAppDataStorage("VKS");
+			
 			settingsProvider = new SettingsProvider(new RoamingAppDataStorage("VKS"));
 			settings = settingsProvider.GetSettings<VKSSettings>();
+			settingsWindow.SetLangBoxName($"{settings.Language}{settings.LangName}");
 
-			speakKeys = new List<Keys> { Keys.RControlKey };
-			clearKeys = new List<Keys> { Keys.RMenu };
-
-			culture = "ru-RU";// settings.Language;
+			speakKeys = settings.SpeakKeys.ToList();
+			clearKeys = settings.ClearKeys.ToList();
+			
+			culture = settings.Language;
 			voiceGender = VoiceGender.Female;
 			voiceAge = VoiceAge.Adult;
 		}

@@ -26,7 +26,11 @@ namespace VirtualKeySpeaker
 		{
 			foreach (CultureInfo cultureInfo in CultureInfo.GetCultures(CultureTypes.NeutralCultures))
 				langBox.Items.Add($"{cultureInfo.Name}|{cultureInfo.DisplayName}");
-			langBox.Text = mainWindow.settings.Language;
+		}
+
+		public void SetLangBoxName(string text)
+		{
+			langBox.Text = text;
 		}
 
 		private void Window_Closed(object sender, EventArgs e)
