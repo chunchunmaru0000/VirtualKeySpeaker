@@ -21,7 +21,7 @@
             Foreground="Linen"
             />
         <ComboBox 
-            IsEditable="True"
+            IsEditable="False"
             DropDownOpened="microsBox_DropDownOpened"
             SelectionChanged="microsBox_SelectionChanged"
             x:Name="microsBox"
@@ -49,7 +49,7 @@
             Foreground="Linen"
             />
         <ComboBox 
-            IsEditable="True"
+            IsEditable="False"
             DropDownOpened="speakersBox_DropDownOpened"
             SelectionChanged="speakersBox_SelectionChanged"
             x:Name="speakersBox"
@@ -100,7 +100,7 @@
             Height="30" Width="290"
             Margin="0,210,0,0"
             FontSize="16"
-            Content="Press to select and press key"
+            Content="Click to select and press key"
             Click="SelectKey"
             ></Button>
         <Rectangle 
@@ -109,6 +109,34 @@
             HorizontalAlignment="Left"
             VerticalAlignment="Top"
             Margin="295,215,0,0"
+            Fill="LightCoral"
+            StrokeThickness="2"
+            Stroke="Black"
+            ></Rectangle>
+
+        <Label 
+            x:Name="clearKeyLabel"
+            Content="Clear key: RMenu" 
+            HorizontalAlignment="Left" Height="30" 
+            Margin="0,240,0,0" VerticalAlignment="Top" Width="290"
+            FontSize="16"
+            Foreground="Linen"
+            />
+        <Button
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            Height="30" Width="290"
+            Margin="0,270,0,0"
+            FontSize="16"
+            Content="Click to select and press key"
+            Click="SelectClearKey"
+            ></Button>
+        <Rectangle 
+            x:Name="clearKeyRect"
+            Width="20" Height="20"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            Margin="295,275,0,0"
             Fill="LightCoral"
             StrokeThickness="2"
             Stroke="Black"

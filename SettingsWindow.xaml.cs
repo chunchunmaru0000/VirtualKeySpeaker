@@ -15,8 +15,10 @@ namespace VirtualKeySpeaker
 	public partial class SettingsWindow : Window
 	{
 		MainWindow mainWindow { get; set; }
+		SelectingKey selectingKey { get; set; } = SelectingKey.None;
 		#region CONST
 		const string keyLabelText = "Speak key";
+		const string clearKeyLabelText = "Clear key";
 		#endregion
 
 		public SettingsWindow(MainWindow mainWindow)
@@ -27,17 +29,19 @@ namespace VirtualKeySpeaker
 			InitSomeBoxes();
 		}
 
+		#region INITS
 		private void InitSomeBoxes()
 		{
 			foreach (CultureInfo cultureInfo in CultureInfo.GetCultures(CultureTypes.NeutralCultures))
 				langBox.Items.Add($"{cultureInfo.Name}|{cultureInfo.DisplayName}");
-
-			keyLabel.Content = $"{keyLabelText}: {mainWindow.speakKeys}";
 		}
+		#endregion
 		#region SET_TEXT
 		public void SetLangBoxName(string text) => langBox.Text = text;
 
 		public void SetKeyLabelTextKey(string text) => keyLabel.Content = $"{keyLabelText}: {text}";
+
+		public void SetClearKeyLabelTextKey(string text) => clearKeyLabel.Content = $"{clearKeyLabelText}: {text}";
 
 		public void SetOurDeviceText(string text) => speakersBox.Text = text;
 
@@ -45,10 +49,8 @@ namespace VirtualKeySpeaker
 
 		public void SetLangBoxUnEditable() => langBox.IsEditable = false;
 		#endregion
-		private void Window_Closed(object sender, EventArgs e)
-		{
-			Environment.Exit(0);
-		}
+		#region HANDLERS
+		private void Window_Closed(object sender, EventArgs e) => App.Current.Shutdown(0);
 
 		private void speakersBox_DropDownOpened(object sender, EventArgs e)
 		{
@@ -111,7 +113,8 @@ namespace VirtualKeySpeaker
 
 			Focus();
 		}
-
+		#endregion
+		#region SELECTS
 		public void SetMicroRect(bool success)
 		{
 			microRect.Fill = success ? Brushes.LightGreen : Brushes.LightCoral;
@@ -126,19 +129,52 @@ namespace VirtualKeySpeaker
 		{
 			mainWindow.isSelectingKey = true;
 			keyRect.Fill = Brushes.LightGreen;
+			selectingKey = SelectingKey.Speak;
+		}
+
+		private void SelectClearKey(object sender, RoutedEventArgs e)
+		{
+			mainWindow.isSelectingKey = true;
+			clearKeyRect.Fill = Brushes.LightGreen;
+			selectingKey = SelectingKey.Clear;
 		}
 
 		public void SelectedKey(Keys key)
 		{
 			mainWindow.isSelectingKey = false;
-			keyRect.Fill = Brushes.LightCoral;
-
 			Console.WriteLine(key);
-			keyLabel.Content = $"{keyLabelText}: {key}";
 
-			mainWindow.settings.SpeakKeys = key;
-			mainWindow.speakKeys = key;
+			switch (selectingKey)
+			{
+				case SelectingKey.Speak:
+					keyRect.Fill = Brushes.LightCoral;
+					keyLabel.Content = $"{keyLabelText}: {key}";
+
+					mainWindow.settings.SpeakKeys = key;
+					mainWindow.speakKeys = key;
+					break;
+				case SelectingKey.Clear:
+					clearKeyRect.Fill = Brushes.LightCoral;
+					clearKeyLabel.Content = $"{clearKeyLabelText}: {key}";
+					
+					mainWindow.settings.ClearKeys = key;
+					mainWindow.clearKeys = key;
+					break;
+				case SelectingKey.None:
+					break;
+				default:
+					break;
+			}
+			
 			mainWindow.SaveSettings();
 		}
+		#endregion
+	}
+
+	enum SelectingKey
+	{
+		Speak,
+		Clear,
+		None,
 	}
 }

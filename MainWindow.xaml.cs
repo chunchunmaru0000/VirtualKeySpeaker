@@ -84,6 +84,7 @@ namespace VirtualKeySpeaker
 			settingsWindow.SetKeyLabelTextKey(speakKeys.ToString());
 
 			clearKeys = settings.ClearKeys;
+			settingsWindow.SetClearKeyLabelTextKey(clearKeys.ToString());
 			
 			culture = settings.Language;
 			voiceGender = VoiceGender.Female;
