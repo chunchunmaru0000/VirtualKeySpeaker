@@ -32,10 +32,10 @@ namespace VirtualKeySpeaker
 		IKeyboardEvents hook { get; set; }
 		int deviceIndex { get; set; }
 		int systemDeviceIndex { get; set; }
-		public WaveOutEvent waveOutEvent { get; set; }
-		public WaveOutEvent systemSound { get; set; }
-		public BufferedWaveProvider waveProvider { get; set; }
-		public BufferedWaveProvider systemWaveProvider { get; set; }
+		public WaveOutEvent waveOutEvent;
+		public WaveOutEvent systemSound;
+		public BufferedWaveProvider waveProvider;
+		public BufferedWaveProvider systemWaveProvider;
 		string lastClipboardText { get; set; } = "";
 		bool hideOutLabel { get; set; }
 		#endregion
@@ -61,8 +61,6 @@ namespace VirtualKeySpeaker
 			InitSettings();
 			InitHookAndSpeech();
 			InitTextWindow();
-
-			System.Windows.Clipboard.ContainsText();
 		}
 
 		#region INITS
@@ -72,18 +70,18 @@ namespace VirtualKeySpeaker
 			{
 				while (true)
 				{
-					if (System.Windows.Clipboard.ContainsText())
+					try
 					{
-						try
+						if (System.Windows.Clipboard.ContainsText())
 						{
 							string text = System.Windows.Clipboard.GetText();
 							if (text != lastClipboardText)
 							{
 								lastClipboardText = text;
 								Console.WriteLine(lastClipboardText);
-							}
-						} catch { }
-					}
+							}	
+						}
+					} catch { }
 					Thread.Sleep(50);
 				}
 			});
@@ -111,8 +109,8 @@ namespace VirtualKeySpeaker
 			settingsProvider = new SettingsProvider(new RoamingAppDataStorage("VKS"));
 			settings = settingsProvider.GetSettings<VKSSettings>();
 			settingsWindow.SetLangBoxName($"{settings.Language}|{settings.LangName}");
-			//settingsWindow.SetLangBoxUnEditable();
 
+			#region KEYS
 			speakKeys = settings.SpeakKeys;
 			settingsWindow.SetKeyLabelTextKey(speakKeys.ToString());
 
@@ -121,16 +119,13 @@ namespace VirtualKeySpeaker
 
 			bufferKeys = settings.BufferKeys;
 			settingsWindow.SetBufferKeyLabelTextKey(bufferKeys.ToString());
-
+			#endregion
 			culture = settings.Language;
 			voiceGender = VoiceGender.Female;
 			voiceAge = VoiceAge.Adult;
 
-			SetMicro(settings.InputDevice);
-			settingsWindow.SetInputDeviceText(settings.InputDevice);
-
-			SetSpeaker(settings.OutDevice);
-			settingsWindow.SetOurDeviceText(settings.OutDevice);
+			SetMicro(settings.InputDevice, true);
+			SetSpeaker(settings.OutDevice, true);
 		}
 		#endregion
 		#region SET
@@ -143,62 +138,61 @@ namespace VirtualKeySpeaker
 			SetSpeech(culture);
 		}
 
-		public void SetMicro(string name)
+		private int GetDeviceIndex(string name)
 		{
+			for (int i = 0; i < WaveOut.DeviceCount; i++)
+				if (WaveOut.GetCapabilities(i).ProductName.Contains(name))
+					return i;
+			return -1;
+		}
+
+		private bool SetDevice(string name, ref WaveOutEvent waveOutEvent, ref BufferedWaveProvider waveProvider)
+		{
+			if (name.Length == 0)
+				return false;
+
 			bool success = true;
 			try
 			{
 				waveOutEvent?.Dispose();
 
-				for (int i = 0; i < WaveOut.DeviceCount; i++)
-					if (WaveOut.GetCapabilities(i).ProductName.Contains(name))
-						deviceIndex = i;
+				int deviceIndex = GetDeviceIndex(name);
 
 				waveOutEvent = new WaveOutEvent() { DeviceNumber = deviceIndex };
-				waveProvider = new BufferedWaveProvider(new WaveFormat(16000, 1)) 
-				{ 
-					BufferDuration = TimeSpan.FromMinutes(1),
+				waveProvider = new BufferedWaveProvider(new WaveFormat(16000, 1))
+				{
+					BufferDuration = TimeSpan.FromMinutes(2),
 					DiscardOnBufferOverflow = true
 				};
 				waveOutEvent.Init(waveProvider);
 				waveOutEvent.Play();
+			}
+			catch { success = false; }
 
+			Console.WriteLine($"{name} {success}");
+			return success;
+		}
+		
+		public void SetMicro(string name, bool setBox = false)
+		{
+			bool success = SetDevice(name, ref waveOutEvent, ref waveProvider);
+			settingsWindow.SetMicroRect(success, name, setBox);
+			if (success)
+			{
 				settings.InputDevice = name;
 				SaveSettings();
 			}
-			catch { success = false; }
-
-			settingsWindow.SetMicroRect(success);
-			Console.WriteLine($"{name} {success}");
 		}
 
-		public void SetSpeaker(string name)
+		public void SetSpeaker(string name, bool setBox = false)
 		{
-			bool success = true;
-			try
+			bool success = SetDevice(name, ref systemSound, ref systemWaveProvider);
+			settingsWindow.SetSpeakerRect(success, name, setBox);
+			if (success)
 			{
-				systemSound?.Dispose();
-				for (int i = 0; i < WaveOut.DeviceCount; i++)
-					if (WaveOut.GetCapabilities(i).ProductName.Contains(name))
-						systemDeviceIndex = i;
-
-				systemSound = new WaveOutEvent() { DeviceNumber = systemDeviceIndex };
-				systemWaveProvider = new BufferedWaveProvider(new WaveFormat(16000, 1)) 
-				{ 
-					BufferDuration = TimeSpan.FromMinutes(1),
-					DiscardOnBufferOverflow = true,
-					ReadFully = true
-				};
-				systemSound.Init(systemWaveProvider);
-				systemSound.Play();
-
 				settings.OutDevice = name;
 				SaveSettings();
 			}
-			catch { success = false; }
-
-			settingsWindow.SetSpeakerRect(success);
-			Console.WriteLine($"{name} {success}");
 		}
 
 		public void SaveSettings() => settingsProvider.SaveSettings(settings);

@@ -38,17 +38,17 @@ namespace VirtualKeySpeaker
 		}
 		#endregion
 		#region SET_TEXT
-		public void SetLangBoxName(string text) => langBox.Text = text;
+		public void SetLangBoxName(string text) 
+		{
+			langBox.Items.Add(text);
+			langBox.SelectedIndex = langBox.Items.Count - 1;
+		}
 
 		public void SetKeyLabelTextKey(string text) => keyLabel.Content = $"{keyLabelText}: {text}";
 
 		public void SetClearKeyLabelTextKey(string text) => clearKeyLabel.Content = $"{clearKeyLabelText}: {text}";
 
 		public void SetBufferKeyLabelTextKey(string text) => bufferKeyLabel.Content = $"{bufferKeyLabelText}: {text}";
-
-		public void SetOurDeviceText(string text) => speakersBox.Text = text;
-
-		public void SetInputDeviceText(string text) => microsBox.Text = text;
 
 		public void SetLangBoxUnEditable() => langBox.IsEditable = false;
 		#endregion
@@ -107,7 +107,7 @@ namespace VirtualKeySpeaker
 
 		private void langBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
 		{
-			if (langBox.SelectedItem == null)
+			if (langBox.SelectedItem == null && langBox.Items.Count == 1)
 				return;
 
 			string[] lang = langBox.SelectedItem.ToString().Split('|');
@@ -115,21 +115,41 @@ namespace VirtualKeySpeaker
 			mainWindow.SetSpeech(lang[0]);
 
 			mainWindow.settings.Language = lang[0];
-			mainWindow.settings.Language = lang[1];
+			mainWindow.settings.LangName = lang[1];
 			mainWindow.SaveSettings();
 
 			Focus();
 		}
 		#endregion
 		#region SELECTS
-		public void SetMicroRect(bool success)
+		public void SetMicroRect(bool success, string name, bool setBox = false)
 		{
-			microRect.Fill = success ? Brushes.LightGreen : Brushes.LightCoral;
+			if (success)
+			{
+				microRect.Fill = Brushes.LightGreen;
+				if (setBox)
+				{
+					microsBox.Items.Add(name);
+					microsBox.SelectedIndex = microsBox.Items.Count - 1;
+				}
+			}
+			else
+				microRect.Fill = Brushes.LightCoral;
 		}
 
-		public void SetSpeakerRect(bool success)
+		public void SetSpeakerRect(bool success, string name, bool setBox = false)
 		{
-			speakerRect.Fill = success ? Brushes.LightGreen : Brushes.LightCoral;
+			if (success)
+			{
+				speakerRect.Fill = Brushes.LightGreen;
+				if (setBox)
+				{
+					speakersBox.Items.Add(name);
+					speakersBox.SelectedIndex = speakersBox.Items.Count - 1;
+				}
+			}
+			else
+				speakerRect.Fill = Brushes.LightCoral;
 		}
 
 		private void SelectKey(object sender, RoutedEventArgs e)
@@ -190,6 +210,11 @@ namespace VirtualKeySpeaker
 			mainWindow.SaveSettings();
 		}
 		#endregion
+
+		private void lenBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+		{
+
+		}
 	}
 
 	enum SelectingKey
