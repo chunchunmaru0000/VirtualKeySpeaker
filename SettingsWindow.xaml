@@ -171,7 +171,7 @@
 
         <Label 
             x:Name="maxOutLenLabel"
-            Content="Max speech lenght in minutes" 
+            Content="Max speech length in minutes" 
             HorizontalAlignment="Left" Height="30" 
             Margin="0,360,0,0" VerticalAlignment="Top" Width="290"
             FontSize="16"
@@ -184,16 +184,16 @@
             Margin="0,390,0,0" 
             VerticalAlignment="Top" Width="290"
             FontSize="16" Background="#FF585858" BorderBrush="#FF252525"
-            />
-        <Rectangle 
-            x:Name="speechLenRect"
-            Width="20" Height="20"
-            HorizontalAlignment="Left"
-            VerticalAlignment="Top"
-            Margin="295,395,0,0"
-            Fill="LightCoral"
-            StrokeThickness="2"
-            Stroke="Black"
-            ></Rectangle>
+            >
+            <ComboBox.Items>
+                <ComboBoxItem>1</ComboBoxItem>
+                <ComboBoxItem>2</ComboBoxItem>
+                <ComboBoxItem>3</ComboBoxItem>
+                <ComboBoxItem>5</ComboBoxItem>
+                <ComboBoxItem>10</ComboBoxItem>
+                <ComboBoxItem>30</ComboBoxItem>
+                <ComboBoxItem>60</ComboBoxItem>
+            </ComboBox.Items>
+        </ComboBox>
     </Grid>
 </Window>

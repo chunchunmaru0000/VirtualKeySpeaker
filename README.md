@@ -17,3 +17,4 @@ Speech synthesizer spoken language can be specified as well as some other contro
 'Clear key' is a key after pressing which inputted text will be cleared.<br>
 Text input can be cleared by one char by pressing backspace.<br>
 'Buffer speak key' is a key after pressing which text from clipboard buffer will be spoken.<br>
+'Max speech length' stands for itself.

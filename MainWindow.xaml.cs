@@ -30,8 +30,6 @@ namespace VirtualKeySpeaker
 		SpeechSynthesizer synthesizer { get; set; }
 		MemoryStream soundStream { get; set; }
 		IKeyboardEvents hook { get; set; }
-		int deviceIndex { get; set; }
-		int systemDeviceIndex { get; set; }
 		public WaveOutEvent waveOutEvent;
 		public WaveOutEvent systemSound;
 		public BufferedWaveProvider waveProvider;
@@ -46,11 +44,10 @@ namespace VirtualKeySpeaker
 		string culture { get; set; }
 		VoiceGender voiceGender { get; set; }
 		VoiceAge voiceAge { get; set; }
-		TimeSpan fadeTime { get; } = TimeSpan.FromSeconds(60);
+		TimeSpan fadeTime { get; } = TimeSpan.FromSeconds(600);
+		TimeSpan bufferDuration { get; set; }
 		string Text { get => string.Join("", InputKey.KeysStream.Select(k => k.Key)); }
 		public bool isSelectingKey { get; set; }
-		#endregion
-		#region CONST
 		#endregion
 
 		public MainWindow()
@@ -105,7 +102,7 @@ namespace VirtualKeySpeaker
 		private void InitSettings()
 		{
 			RoamingAppDataStorage storage = new RoamingAppDataStorage("VKS");
-			
+
 			settingsProvider = new SettingsProvider(new RoamingAppDataStorage("VKS"));
 			settings = settingsProvider.GetSettings<VKSSettings>();
 			settingsWindow.SetLangBoxName($"{settings.Language}|{settings.LangName}");
@@ -124,11 +121,13 @@ namespace VirtualKeySpeaker
 			voiceGender = VoiceGender.Female;
 			voiceAge = VoiceAge.Adult;
 
+			bufferDuration = TimeSpan.FromMinutes(settings.SpeechLength);
+			settingsWindow.SetSpeechLength(settings.SpeechLength);
+
 			SetMicro(settings.InputDevice, true);
 			SetSpeaker(settings.OutDevice, true);
 		}
-		#endregion
-		#region SET
+
 		private void InitHookAndSpeech()
 		{
 			hook = Hook.GlobalEvents();
@@ -137,7 +136,8 @@ namespace VirtualKeySpeaker
 
 			SetSpeech(culture);
 		}
-
+		#endregion
+		#region SET
 		private int GetDeviceIndex(string name)
 		{
 			for (int i = 0; i < WaveOut.DeviceCount; i++)
@@ -161,7 +161,7 @@ namespace VirtualKeySpeaker
 				waveOutEvent = new WaveOutEvent() { DeviceNumber = deviceIndex };
 				waveProvider = new BufferedWaveProvider(new WaveFormat(16000, 1))
 				{
-					BufferDuration = TimeSpan.FromMinutes(2),
+					BufferDuration = bufferDuration,
 					DiscardOnBufferOverflow = true
 				};
 				waveOutEvent.Init(waveProvider);

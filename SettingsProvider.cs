@@ -1,7 +1,4 @@
-﻿using SettingsProviderNet;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Windows.Forms;
 
 namespace VirtualKeySpeaker
@@ -28,5 +25,8 @@ namespace VirtualKeySpeaker
 
 		[DefaultValue("")]
 		public string InputDevice { get; set; }
+
+		[DefaultValue(1)]
+		public double SpeechLength { get; set; }
 	}
 }

@@ -3,8 +3,8 @@ using System;
 using System.Globalization;
 using System.Linq;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Forms;
-using System.Windows.Input;
 using System.Windows.Media;
 
 namespace VirtualKeySpeaker
@@ -49,8 +49,6 @@ namespace VirtualKeySpeaker
 		public void SetClearKeyLabelTextKey(string text) => clearKeyLabel.Content = $"{clearKeyLabelText}: {text}";
 
 		public void SetBufferKeyLabelTextKey(string text) => bufferKeyLabel.Content = $"{bufferKeyLabelText}: {text}";
-
-		public void SetLangBoxUnEditable() => langBox.IsEditable = false;
 		#endregion
 		#region HANDLERS
 		private void Window_Closed(object sender, EventArgs e)
@@ -87,7 +85,7 @@ namespace VirtualKeySpeaker
 			}
 		}
 
-		private void microsBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+		private void microsBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
 		{
 			if (microsBox.SelectedItem == null)
 				return;
@@ -96,7 +94,7 @@ namespace VirtualKeySpeaker
 			Focus();
 		}
 
-		private void speakersBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+		private void speakersBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
 		{
 			if (speakersBox.SelectedItem == null)
 				return;
@@ -105,7 +103,7 @@ namespace VirtualKeySpeaker
 			Focus();
 		}
 
-		private void langBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+		private void langBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
 		{
 			if (langBox.SelectedItem == null && langBox.Items.Count == 1)
 				return;
@@ -152,26 +150,26 @@ namespace VirtualKeySpeaker
 				speakerRect.Fill = Brushes.LightCoral;
 		}
 
-		private void SelectKey(object sender, RoutedEventArgs e)
+		public void SetSpeechLength(double minutes) =>
+			lenBox.SelectedIndex = Enumerable
+				.Range(0, lenBox.Items.Count)
+				.FirstOrDefault(i => (lenBox.Items[i] as ComboBoxItem).Content.ToString() == Convert.ToInt32(minutes).ToString());
+
+		void SelectSelectingKey(System.Windows.Shapes.Rectangle rect, SelectingKey key)
 		{
+			if (mainWindow.isSelectingKey)
+				return;
+
 			mainWindow.isSelectingKey = true;
-			keyRect.Fill = Brushes.LightGreen;
-			selectingKey = SelectingKey.Speak;
+			rect.Fill = Brushes.LightGreen;
+			selectingKey = key;
 		}
 
-		private void SelectClearKey(object sender, RoutedEventArgs e)
-		{
-			mainWindow.isSelectingKey = true;
-			clearKeyRect.Fill = Brushes.LightGreen;
-			selectingKey = SelectingKey.Clear;
-		}
+		private void SelectKey(object sender, RoutedEventArgs e) => SelectSelectingKey(keyRect, SelectingKey.Speak);
 
-		private void SelectBufferKey(object sender, RoutedEventArgs e)
-		{
-			mainWindow.isSelectingKey = true;
-			bufferKeyRect.Fill = Brushes.LightGreen;
-			selectingKey = SelectingKey.Buffer;
-		}
+		private void SelectClearKey(object sender, RoutedEventArgs e) => SelectSelectingKey(clearKeyRect, SelectingKey.Clear);
+
+		private void SelectBufferKey(object sender, RoutedEventArgs e) => SelectSelectingKey(bufferKeyRect, SelectingKey.Buffer);
 
 		public void SelectedKey(Keys key)
 		{
@@ -209,12 +207,19 @@ namespace VirtualKeySpeaker
 			
 			mainWindow.SaveSettings();
 		}
-		#endregion
 
-		private void lenBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+		private void lenBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
 		{
+			double minutes = Convert.ToDouble((lenBox.SelectedItem as ComboBoxItem).Content);
+			mainWindow.settings.SpeechLength = minutes;
+			mainWindow.SaveSettings();
 
+			if (mainWindow.waveProvider == null || mainWindow.systemWaveProvider == null)
+				return;
+			mainWindow.waveProvider.BufferDuration = TimeSpan.FromMinutes(minutes);
+			mainWindow.systemWaveProvider.BufferDuration = TimeSpan.FromMinutes(minutes);
 		}
+		#endregion
 	}
 
 	enum SelectingKey
